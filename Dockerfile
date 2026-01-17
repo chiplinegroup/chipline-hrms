@@ -21,8 +21,6 @@ COPY . .
 
 RUN chmod +x /app/entrypoint.sh
 
-CMD ["/app/entrypoint.sh"]
-
 CMD python manage.py migrate && \
     python manage.py loaddata data.json || true && \
     python render_setup.py && \
