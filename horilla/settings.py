@@ -251,3 +251,5 @@ LOGGING = {
     "disable_existing_loggers": True,
 }
 
+EMAIL_BACKEND = "base.backends.BrevoEmailBackend"
+
