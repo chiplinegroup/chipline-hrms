@@ -7,6 +7,14 @@ This module is used to write email backends
 import importlib
 import logging
 
+# ================================
+# SAFE EMAIL DISABLE (RENDER)
+# ================================
+import os
+
+DISABLE_EMAIL = os.environ.get("DISABLE_EMAIL", "true").lower() == "true"
+
+
 from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.core.mail.backends.smtp import EmailBackend
@@ -197,17 +205,24 @@ if EMAIL_BACKEND and EMAIL_BACKEND != default:
 class ConfiguredEmailBackend(BACKEND_CLASS):
 
     def send_messages(self, email_messages):
-        response = super(BACKEND_CLASS, self).send_messages(email_messages)
-        for message in email_messages:
-            email_log = EmailLog(
-                subject=message.subject,
-                from_email=self.dynamic_from_email_with_display_name,
-                to=message.to,
-                body=message.body,
-                status="sent" if response else "failed",
-            )
-            email_log.save()
-        return response
+    # 🚨 SAFETY: Disable email sending on Render
+    if DISABLE_EMAIL:
+        logger.warning("Email sending disabled (DISABLE_EMAIL=true)")
+        return 0
+
+    response = super(BACKEND_CLASS, self).send_messages(email_messages)
+
+    for message in email_messages:
+        email_log = EmailLog(
+            subject=message.subject,
+            from_email=self.dynamic_from_email_with_display_name,
+            to=message.to,
+            body=message.body,
+            status="sent" if response else "failed",
+        )
+        email_log.save()
+
+    return response
 
 
 if EMAIL_BACKEND != default:
