@@ -38,3 +38,7 @@ emp.save()
 
 print("Employee ensured & active")
 
+from employee.models import Employee
+
+print("EMPLOYEE COUNT =", Employee.objects.count())
+
