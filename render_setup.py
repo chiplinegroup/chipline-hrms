@@ -1,45 +1,42 @@
 import os
 import django
 
-# Tell Django where settings are
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "horilla.settings")
 django.setup()
 
 from django.contrib.auth.models import User
 from employee.models import Employee
 
-# Admin credentials
 USERNAME = "chipline"
 EMAIL = "ceo.chipline@gmail.com"
 PASSWORD = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
 
-# 1️⃣ Create admin user if not exists
-user, created = User.objects.get_or_create(
-    username=USERNAME,
+print("ADMIN_PASSWORD FROM ENV =", PASSWORD)
+
+# 1️⃣ FORCE create or update admin user
+user, _ = User.objects.get_or_create(username=USERNAME)
+user.email = EMAIL
+user.is_staff = True
+user.is_superuser = True
+user.set_password(PASSWORD)   # 🔥 FORCE password reset
+user.save()
+
+print("Admin user ensured & password reset")
+
+# 2️⃣ FORCE create or update employee
+emp, _ = Employee.objects.get_or_create(
+    employee_user_id=user,
     defaults={
+        "employee_first_name": "Admin",
+        "employee_last_name": "User",
         "email": EMAIL,
-        "is_staff": True,
-        "is_superuser": True,
+        "is_active": True,
     },
 )
 
-if created:
-    user.set_password(PASSWORD)
-    user.save()
-    print("Admin user created")
-else:
-    print("Admin user already exists")
+emp.is_active = True
+emp.email = EMAIL
+emp.save()
 
-# 2️⃣ Create employee linked to admin user
-if not Employee.objects.filter(employee_user_id=user).exists():
-    Employee.objects.create(
-        employee_user_id=user,
-        employee_first_name="Admin",
-        employee_last_name="User",
-        email=EMAIL,
-        is_active=True,
-    )
-    print("Employee created for admin")
-else:
-    print("Employee already exists")
+print("Employee ensured & active")
 
