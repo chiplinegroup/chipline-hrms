@@ -1,9 +1,15 @@
 import os
+import logging
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 
 from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
+
+# =====================================================
+# LOGGER (⚠️ REQUIRED BY OTHER APPS)
+# =====================================================
+logger = logging.getLogger(__name__)
 
 
 # =====================================================
@@ -21,7 +27,7 @@ class BrevoEmailBackend(BaseEmailBackend):
 
         api_key = getattr(settings, "BREVO_API_KEY", None)
         if not api_key:
-            # Do NOT crash the app if email is misconfigured
+            logger.warning("BREVO_API_KEY not set. Email disabled.")
             self.enabled = False
             return
 
@@ -60,23 +66,20 @@ class BrevoEmailBackend(BaseEmailBackend):
                 sent += 1
 
             except ApiException as e:
-                # Never crash the app because of email
-                print("Brevo email error:", e)
+                logger.error("Brevo email error: %s", e)
 
         return sent
 
 
 # =====================================================
-# COMPATIBILITY BACKEND (DO NOT REMOVE)
+# COMPATIBILITY BACKEND (⚠️ DO NOT REMOVE)
 # =====================================================
-# ⚠️ Other parts of Horilla import this class by name
-# We keep it and forward everything to Brevo
+# Existing Horilla code imports this by name
 # =====================================================
 
 class ConfiguredEmailBackend(BrevoEmailBackend):
     """
     Backward-compatible alias.
-    Existing code expects this class.
     """
     pass
 
