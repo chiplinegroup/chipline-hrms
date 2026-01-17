@@ -11,8 +11,6 @@ USERNAME = "chipline"
 EMAIL = "ceo.chipline@gmail.com"
 PASSWORD = os.environ.get("ADMIN_PASSWORD", "ChangeMe123!")
 
-print("ADMIN_PASSWORD FROM ENV =", PASSWORD)
-
 # 1️⃣ FORCE create or update admin user
 user, _ = User.objects.get_or_create(username=USERNAME)
 user.email = EMAIL
