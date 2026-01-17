@@ -1,15 +1,18 @@
 #!/bin/sh
 set -e
 
-echo "Making migrations (if missing)..."
-python manage.py makemigrations --noinput
+echo "Running migrations..."
+python manage.py migrate --noinput
 
-echo "Running migrations (force syncdb)..."
-python manage.py migrate --noinput --run-syncdb
+echo "Loading local data (if present)..."
+python manage.py loaddata local_data.json || echo "⚠️ Data already loaded or skipped"
+
+echo "Ensuring admin + employee..."
+python render_setup.py
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "Starting Gunicorn..."
-gunicorn horilla.wsgi:application --bind 0.0.0.0:$PORT
+exec gunicorn horilla.wsgi:application --bind 0.0.0.0:$PORT
 
