@@ -30,7 +30,7 @@ env = environ.Env(
         str,
         "django-insecure-j8op9)1q8$1&0^s&p*_0%d#pr@w9qj@1o=3#@d=a(^@9@zd@%j",
     ),
-    ALLOWED_HOSTS=(list, ["*"]),
+    ALLOWED_HOSTS=(list, []),
     CSRF_TRUSTED_ORIGINS=(list, ["http://localhost:8000"]),
 )
 
@@ -252,3 +252,20 @@ LOGGING = {
 }
 
 EMAIL_BACKEND = "base.backends.BrevoEmailBackend"
+
+# =====================================================
+# EMAIL CONFIGURATION (BREVO API — NO SMTP)
+# =====================================================
+
+EMAIL_BACKEND = "base.backends.BrevoEmailBackend"
+
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL",
+    default="HRMS <team.chipline@gmail.com>",
+)
+
+BREVO_API_KEY = env("BREVO_API_KEY", default=None)
+
+# Safety: never fail requests if email fails
+EMAIL_FAIL_SILENTLY = True
+
