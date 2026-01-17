@@ -252,4 +252,3 @@ LOGGING = {
 }
 
 EMAIL_BACKEND = "base.backends.BrevoEmailBackend"
-
