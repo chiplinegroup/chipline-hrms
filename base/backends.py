@@ -265,3 +265,48 @@ def new_init(
 
 
 EmailMessage.__init__ = new_init
+# =====================================================
+# Employee User Creation Helper
+# Username = Email
+# Default password for new employees
+# =====================================================
+
+import os
+import logging
+from django.contrib.auth.models import User
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_EMPLOYEE_PASSWORD = os.getenv(
+    "DEFAULT_EMPLOYEE_PASSWORD", "Welcome@123"
+)
+
+
+def create_employee_user(email: str):
+    """
+    Create employee user with:
+    - username = email
+    - common default password
+    - admin users NOT affected
+    """
+
+    if not email:
+        raise ValueError("Email is required")
+
+    user, created = User.objects.get_or_create(
+        username=email,
+        defaults={
+            "email": email,
+            "is_active": True,
+        },
+    )
+
+    if created:
+        user.set_password(DEFAULT_EMPLOYEE_PASSWORD)
+        user.last_login = None  # force password change
+        user.save()
+
+        logger.info(f"Employee user created: {email}")
+
+    return user
+
