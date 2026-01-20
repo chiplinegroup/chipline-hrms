@@ -461,6 +461,29 @@ class Employee(models.Model):
                 return self.pk in working_employees
         return False
 
+from django.contrib.auth.models import User
+
+def save(self, *args, **kwargs):
+    # 🔐 Ensure Django User exists
+    if self.email:
+        user, created = User.objects.get_or_create(
+            username=self.email,
+            defaults={
+                "email": self.email,
+                "is_active": True,
+            },
+        )
+
+        # 🔑 Set default password ONLY when user is first created
+        if created:
+            user.set_password("Welcome@123")
+            user.save()
+
+        self.employee_user_id = user
+
+    super().save(*args, **kwargs)
+
+
     class Meta:
         """
         Recruitment model
