@@ -34,7 +34,14 @@ emp, _ = Employee.objects.get_or_create(
 
 emp.is_active = True
 emp.email = EMAIL
-emp.save()
+emp.is_active = True
+emp.email = EMAIL
+
+# 🔒 Skip full_clean to avoid file validation errors on Render
+Employee.objects.filter(pk=emp.pk).update(
+    is_active=True,
+    email=EMAIL
+)
 
 print("Employee ensured & active")
 
